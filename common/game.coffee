@@ -73,6 +73,7 @@ class Game
 				@expectedTurn =
 					type: "move"
 					playerID: @players[@players.indexOf(move.playerID)+1]
+		cb()
 	validateMove: (move) ->
 		if move.type == "bid"
 			# Get previous bids
