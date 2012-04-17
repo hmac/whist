@@ -24,4 +24,5 @@ makeMove:
 [this repeats until all players have played a card]
 
 concludeTrick:
-	
+	find winning card of trick
+	[next up would be scoring but this isn't implemented yet]
