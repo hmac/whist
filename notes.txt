@@ -1,0 +1,27 @@
+Game process:
+	Deal
+	Bid
+	Play Trick (repeat for all tricks)
+	Score
+
+
+Create game (options: player limit)
+start:
+	@begun = true
+	@deal
+	set @expectedTurn
+	callback
+
+[clients examine @expectedTurn and first bidder bids]
+
+makeMove:
+	validate bid/move (validateMove)
+	@moves.push(move)
+	if move is last of the trick, call concludeTrick()
+	set @expectedTurn
+	callback
+
+[this repeats until all players have played a card]
+
+concludeTrick:
+	
