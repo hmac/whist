@@ -1,3 +1,5 @@
+require 'validation'
+
 class Game
 	constructor: (@playerLimit) ->
 		@players = []
@@ -49,9 +51,11 @@ class Game
 	makeMove: (move, cb) ->
 		unless move.type == @expectedTurn.type and move.playerID == @expectedTurn.playerID
 			return
-		# TODO: @validateMove(move)
-		@moves[@round] ||= []
-		@moves[@round].push(move)
+		if !(@validateMove move)
+			console.log "invalid move"
+			return
+		@moves[@round-1] ||= []
+		@moves[@round-1].push(move)
 		if move.type == 'bid'
 			if move.playerID == @players[@players.length-1] # all players have bid
 				@expectedTurn =
@@ -69,6 +73,17 @@ class Game
 				@expectedTurn =
 					type: "move"
 					playerID: @players[@players.indexOf(move.playerID)+1]
+	validateMove: (move) ->
+		if move.type == "bid"
+			# Get previous bids
+				prevBids = []
+				for move in @moves[@round-1]
+					a.push move.value
+			if move.playerID == @players[@players.length-1] # all players have bid
+				return validateLastBid move.value, @rounds[@round-1], prevBids
+			else
+				return validateBid move.value, @rounds[@round-1]
+		else return validateCardPlayed move.value, @cards[move.playerID], @trumps, @table[0]
 	deal: (number) ->
 		deck = newDeck()
 		for p in @players
