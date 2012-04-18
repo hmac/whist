@@ -26,6 +26,10 @@ socket.on 'gameStart', () ->
 	socket.emit 'state'
 	console.log 'game started'
 
+socket.on 'end', () ->
+	console.log "Game over"
+	socket.emit 'state'
+
 
 join = (playerID) ->
 	socket.emit 'join', {playerID: playerID}

@@ -2,7 +2,8 @@ require 'validation'
 
 class Game
 	constructor: (@playerLimit) ->
-		@scores = []
+		@tricks = {} # A tally of how many tricks each player has won in the round e.g. @tricks[playerID] --> 2
+		@scores = [] # An array of objects showing cumulative score for each round. e.g. @scores[@round-1] --> {playerID: score, playerID: score, ..}
 		@players = []
 		@table = [] # Cards currently 'on table' -- the ones in the current trick
 		@trumps = ""
@@ -25,6 +26,7 @@ class Game
 			round: @round
 			players: @players
 			hand: @cards[playerID]
+			scores: @scores
 	join: (playerID, cb) ->
 		@players.push(playerID)
 		@scores[playerID] = 0
@@ -72,7 +74,7 @@ class Game
 			@table.push(move.value) # Add card to @table -- move.value must be of the form {number, suit, owner}
 			if move.playerID == @players[@players.length-1] # all players have played a card
 				# end trick somehow... calc winner and score etc.
-				console.log 'end of trick not implemented'
+				concludeTrick()
 			else
 				@expectedTurn =
 					type: "move"
@@ -97,20 +99,48 @@ class Game
 		# Work out how many tricks have been played
 		tricks_played = (@moves[@round-1].length/@playerLimit)-1 # -1 because 4 moves at the start are bids
 		if tricks_played == @rounds[@round-1] # This is the last trick
-			# Now we need to do scoring based on this. I haven't implemented any scoring yet...
+			# Calculate and record scores
 			calculateScore()
+			# Reset stuff and start the new round
+			@table = []
+			# Check if this is the last round
+			if @round == @rounds.length
+				# Indicate the game is over
+				console.log "Game over"
+				@expectedTurn = null
+				@callbacks['end']() # Call the 'end' callback
+			else
+				# Start the next round
+				@round++
+				start()
 		else
-
 			# Note the winner of this trick, reset the table, and start the next trick
+			@tricks[winner.owner] ||= 0 # Initialise the trick count if it hasn't been created yet
+			@tricks[winner.owner] += 1 # Increment it
+			# Reset the table and set the expectedMove
+			@table = []
+			@expectedMove =
+				type: "move"
+				playerID: @players[0]
 	calculateScore: () ->
 		# Get the bids
-
+		bids = @moves[@round-1].slice(0, @playerLimit) # Bids = first [number of players] moves in the round
+		# SCORE: (tricks < bid) = tricks; (tricks == bid) = tricks+10; (tricks > bid) = bid - tricks;
+		for playerID, tricks of @tricks
+			bid = bids.filter (move) ->
+				move.playerID == playerID
+			score = 0
+			score = tricks if tricks < bid
+			score = tricks + 10 if tricks == bid
+			score = bid - tricks if tricks > bid
+			# Set prevScore to score of previous round if it exists, else set to 0
+			prevScore = if @scores[@round-2]? then @scores[@round-2][playerID] else 0
+			# Total score = score from previous round + score from this round
+			@scores[@round-1][playerID] = prevScore + score
 	validateMove: (move) ->
 		if move.type == "bid"
 			# Get previous bids
-				prevBids = []
-				for move in @moves[@round-1]
-					a.push move.value
+			prevBids = @moves[@round-1] # The only moves made so far are bids so this is safe
 			if move.playerID == @players[@players.length-1] # all players have bid
 				return validateLastBid move.value, @rounds[@round-1], prevBids
 			else

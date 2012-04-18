@@ -66,11 +66,11 @@ io.sockets.on 'connection', (socket) ->
 			data.isme = true
 			socket.emit 'join', data
 
-game.on 'start', (data) ->
+game.on 'start', () ->
 	console.log 'game started', data
 	io.sockets.emit 'gameStart'
 
-game.on 'end', (data) ->
+game.on 'end', () ->
 	console.log 'game ended'
 	io.sockets.emit 'end'
-	# Stop game?
+	

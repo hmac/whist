@@ -27,6 +27,7 @@ concludeTrick:
 	find winning card of trick
 	if trick is last trick:
 		calculateScore()
+		increment round
 	else
 		reset @table
 		reset
