@@ -16,8 +16,6 @@ class Game
 		t = Math.floor(52/@playerLimit)
 		@rounds = [7..t].concat [t-1..1] # The number of cards to deal in each round i.e. 7,8,9,10,9,8,7,6...
 		@round = 1 # The current round
-	on: (event, cb) ->
-		@callbacks[event] = cb
 	getState: (playerID) ->
 		state =
 			table: @table
@@ -50,6 +48,8 @@ class Game
 			callback(data)
 		else
 			throw "No callback defined for "+event
+	on: (event, cb) ->
+		@callbacks[event] = cb
 	makeMove: (move, cb) ->
 		unless move.type == @expectedTurn.type and move.playerID == @expectedTurn.playerID
 			return
