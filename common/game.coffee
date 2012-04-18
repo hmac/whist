@@ -2,7 +2,7 @@ require 'validation'
 
 class Game
 	constructor: (@playerLimit) ->
-		@scores []
+		@scores = []
 		@players = []
 		@table = []
 		@trumps = ""
@@ -100,8 +100,8 @@ class Game
 			# Now we need to do scoring based on this. I haven't implemented any scoring yet...
 			calculateScore()
 		else
-			# Note the winner of this trick, reset the table, and start the next trick
 
+			# Note the winner of this trick, reset the table, and start the next trick
 	calculateScore: () ->
 		# Get the bids
 
