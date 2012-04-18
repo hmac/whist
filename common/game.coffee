@@ -4,18 +4,18 @@ class Game
 	constructor: (@playerLimit) ->
 		@scores = []
 		@players = []
-		@table = []
+		@table = [] # Cards currently 'on table' -- the ones in the current trick
 		@trumps = ""
-		@moves = []
+		@moves = [] # Moves made - both bids and cards. Contains an array for each round.
 		@phase = "bid"
-		@expectedTurn = null
-		@scores = {}
-		@begun = false
-		@callbacks = []
-		@cards = {}
+		@expectedTurn = null # The player and type of move expected. Used by clients to find out whose turn it is.
+		@scores = {} # Scores. A property for each player i.e. @scores[playerID]
+		@begun = false # Has game begun
+		@callbacks = [] # In order to be able to do "Game.on 'event', handler () ->". Not sure if this is necessary.
+		@cards = {} # The hands of each player. Access like @cards[playerID].
 		t = Math.floor(52/@playerLimit)
-		@rounds = [7..t].concat [t-1..1]
-		@round = 1
+		@rounds = [7..t].concat [t-1..1] # The number of cards to deal in each round i.e. 7,8,9,10,9,8,7,6...
+		@round = 1 # The current round
 	on: (event, cb) ->
 		@callbacks[event] = cb
 	getState: (playerID) ->
