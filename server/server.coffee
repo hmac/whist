@@ -18,6 +18,7 @@ app.listen 3000, 'localhost'
 
 #SocketIO object
 io = ioLib.listen(3030)
+io.set('log level', 1)
 
 # Create new game
 game = new Game(2) # playerLimit = 2
@@ -47,7 +48,8 @@ io.sockets.on 'connection', (socket) ->
 		if game.expectedTurn? && game.expectedTurn.type != move.type	
 			return
 		game.makeMove move, () ->
-			io.sockets.emit 'state', {state: game.getState(playerID)}
+			for p in players
+				p.socket.emit 'state', {state: game.getState(p.playerID)}
 
 	# Client asks for game state
 	socket.on 'state', (data) ->
@@ -62,12 +64,13 @@ io.sockets.on 'connection', (socket) ->
 		console.log 'player joining: '+data.playerID
 		game.join data.playerID, () ->
 			playerID = data.playerID
+			players.push {'playerID':data.playerID, 'socket':socket}
 			socket.broadcast.emit 'join', data
 			data.isme = true
 			socket.emit 'join', data
 
 game.on 'start', () ->
-	console.log 'game started', data
+	console.log 'game started'
 	io.sockets.emit 'gameStart'
 
 game.on 'end', () ->

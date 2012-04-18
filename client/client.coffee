@@ -1,21 +1,21 @@
 socket = io.connect 'http://localhost:3030'
 
-game = new Game()
 playerID = null
+_state = null
 
 # Get initial game state
 socket.on 'start', (data) ->
 	console.log 'state received', data
+	_state = data.state
 
 socket.on 'state', (data) ->
 	console.log 'state update', data
-	# game.updateState
-	if data.state.expectedTurn? && data.state.expectedTurn.playerID == playerID
+	_state = data.state
+	if data.state.expectedTurn?.playerID == playerID
 		console.log 'it is your turn'
 
 socket.on 'join', (data) ->
 	console.log 'player joined', data
-	game.join(data.playerID)
 	if data.isme
 	  	playerID = data.playerID
 
@@ -38,8 +38,10 @@ getState = () ->
 move = (move) -> # {type, value}
 	move.playerID = playerID
 	socket.emit 'move', move
+state = () ->
+	_state
 
-window._game = game
+window.state = state
 window.join = join
 window.getState = getState
 window.move = move

@@ -51,6 +51,7 @@ class Game
 	on: (event, cb) ->
 		@callbacks[event] = cb
 	makeMove: (move, cb) ->
+		console.log 'makeMove'
 		unless move.type == @expectedTurn.type and move.playerID == @expectedTurn.playerID
 			return
 		if !(@validateMove move)
@@ -143,7 +144,7 @@ class Game
 				return validateLastBid move.value, @rounds[@round-1], prevBids
 			else
 				return validateBid move.value, @rounds[@round-1]
-		else return validateCardPlayed move.value, @cards[move.playerID], @trumps, @table[0]
+		else return validateCardPlayed move.value, @cards[move.playerID], @trumps, (@table[0] || move.value)
 	deal: (number) ->
 		deck = newDeck()
 		for p in @players
@@ -162,6 +163,12 @@ class Game
 max = (cards) ->
 	card = {value: 0}
 	for c in cards
+		val = switch c.value
+			when "A" then 14
+			when "K" then 13
+			when "Q" then 12
+			when "J" then 11
+			else c.value
 		card = c if c.value > card.value
 	return card
 
@@ -188,14 +195,19 @@ newDeck = () ->
 validateBid = (bid, number_of_tricks) ->
 	return (bid > 0 && bid < number_of_tricks)
 validateCardPlayed = (card, hand, trumps, card_led) ->
+	if !containsCard(hand, card)
+		console.log "card is not in player's hand", card, hand
+		return false
 	if card.suit == trumps
 		if containsSuit(hand, card_led.suit)
+			console.log "player is able to follow suit but has not"
 			return false
 		else 
 			return true
 	if card.suit == card_led.suit
 		return true
 	if containsSuit(hand, card_led.suit)
+		console.log "player is able to follow suit but has not"
 		return false
 	else
 		return true
@@ -204,6 +216,10 @@ validateLastBid = (bid, number_of_tricks, previousBids) ->
 containsSuit = (cards, suit) ->
 	for c in cards
 		return true if c.suit == suit
+	return false
+containsCard = (cards, card) ->
+	for c in cards
+		return true if c.suit == card.suit and c.number == card.number
 	return false
 sum = (array) ->
 	t = 0
