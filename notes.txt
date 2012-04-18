@@ -30,3 +30,7 @@ concludeTrick:
 	else
 		reset @table
 		reset
+
+
+TODO: 	Have winner of previous round choose trumps
+		Have dealer rotate
