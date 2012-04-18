@@ -25,4 +25,8 @@ makeMove:
 
 concludeTrick:
 	find winning card of trick
-	[next up would be scoring but this isn't implemented yet]
+	if trick is last trick:
+		calculateScore()
+	else
+		reset @table
+		reset
