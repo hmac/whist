@@ -2,6 +2,7 @@ require 'validation'
 
 class Game
 	constructor: (@playerLimit) ->
+		@scores []
 		@players = []
 		@table = []
 		@trumps = ""
@@ -56,7 +57,7 @@ class Game
 			console.log "invalid move"
 			return
 		@moves[@round-1] ||= []
-		@moves[@round-1].push(move)
+		@moves[@round-1].push(move) # Add move to moves list
 		if move.type == 'bid'
 			if move.playerID == @players[@players.length-1] # all players have bid
 				@expectedTurn =
@@ -67,7 +68,8 @@ class Game
 					type: "bid"
 					playerID: @players[@players.indexOf(move.playerID)+1]
 		else
-		@cards[move.playerID].splice(@cards[move.playerID].indexOf(move.value),1) # Remove card from player's hand
+			@cards[move.playerID].splice(@cards[move.playerID].indexOf(move.value),1) # Remove card from player's hand
+			@table.push(move.value) # Add card to @table -- move.value must be of the form {number, suit, owner}
 			if move.playerID == @players[@players.length-1] # all players have played a card
 				# end trick somehow... calc winner and score etc.
 				console.log 'end of trick not implemented'
@@ -77,9 +79,8 @@ class Game
 					playerID: @players[@players.indexOf(move.playerID)+1]
 		cb()
 	concludeTrick: () ->
-		# Get the top (number of players) cards from @moves e.g. for 4 players, get top 4 cards
-		# These will be the cards played in the trick that we are concluding
-		cards = @moves.slice(@moves.length-@playerLimit)
+		# Get the cards played in the trick that we are concluding
+		cards = @table
 		# Now we need to work out who won...
 		winner = null
 		suit_led = cards[0].suit
@@ -92,9 +93,18 @@ class Game
 		else # No trumps were played, so find the highest of the cards of the led suit
 			cards_played = cards.filter (card) ->
 				card.suit == suit_led
-			winner = max(cards_played)
-		# Now we need to do scoring based on this. I haven't implemented any scoring yet...
-		# The good news is that that winner-finding algorithm is significantly shorter than the last two I remember writing!
+				winner = max(cards_played)
+		# Work out how many tricks have been played
+		tricks_played = (@moves[@round-1].length/@playerLimit)-1 # -1 because 4 moves at the start are bids
+		if tricks_played == @rounds[@round-1] # This is the last trick
+			# Now we need to do scoring based on this. I haven't implemented any scoring yet...
+			calculateScore()
+		else
+			# Note the winner of this trick, reset the table, and start the next trick
+
+	calculateScore: () ->
+		# Get the bids
+
 	validateMove: (move) ->
 		if move.type == "bid"
 			# Get previous bids
