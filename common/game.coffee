@@ -1,3 +1,5 @@
+_ = require("underscore")._ # Bind all the Underscore.js functions to _ (node uses _)
+
 class Game
 	constructor: (@playerLimit) ->
 		@tricks = {} # A tally of how many tricks each player has won in the round e.g. @tricks[playerID] --> 2
@@ -25,6 +27,7 @@ class Game
 			players: @players
 			hand: @cards[playerID]
 			scores: @scores
+			tricks: @tricks
 	join: (playerID, cb) ->
 		@players.push(playerID)
 		@scores[playerID] = 0
@@ -69,37 +72,42 @@ class Game
 					type: "bid"
 					playerID: @players[@players.indexOf(move.playerID)+1]
 		else
-			@cards[move.playerID].splice(@cards[move.playerID].indexOf(move.value),1) # Remove card from player's hand
+			console.log 'cards: ', @cards[move.playerID]
+			console.log 'card: ', move.value
+			card_removed = @cards[move.playerID].remove(move.value) # Remove card from player's hand
+			console.log "card removed: ", card_removed
 			@table.push(move.value) # Add card to @table -- move.value must be of the form {number, suit, owner}
 			if move.playerID == @players[@players.length-1] # all players have played a card
 				# end trick somehow... calc winner and score etc.
-				concludeTrick()
+				@concludeTrick()
 			else
+				console.log 'trick not ended'
 				@expectedTurn =
-					type: "move"
+					type: "card"
 					playerID: @players[@players.indexOf(move.playerID)+1]
 		cb()
 	concludeTrick: () ->
+		console.log 'concludeTrick'
 		# Get the cards played in the trick that we are concluding
 		cards = @table
 		# Now we need to work out who won...
 		winner = null
 		suit_led = cards[0].suit
 		# Check if there were any trumps played (they will immediately win)
+		trumps_played = cards.filter (card) ->
+			card.suit == @trumps
 		if trumps_played.length > 0
 			# Find the highest of the trumps
-			trumps_played = cards.filter (card) ->
-				card.suit == @trumps
 			winner = max(trumps_played)
 		else # No trumps were played, so find the highest of the cards of the led suit
 			cards_played = cards.filter (card) ->
 				card.suit == suit_led
-				winner = max(cards_played)
+			winner = max(cards_played)
 		# Work out how many tricks have been played
 		tricks_played = (@moves[@round-1].length/@playerLimit)-1 # -1 because 4 moves at the start are bids
 		if tricks_played == @rounds[@round-1] # This is the last trick
 			# Calculate and record scores
-			calculateScore()
+			@calculateScore()
 			# Reset stuff and start the new round
 			@table = []
 			# Check if this is the last round
@@ -111,16 +119,17 @@ class Game
 			else
 				# Start the next round
 				@round++
-				start()
+				@start()
 		else
+			console.log "winner of trick: ", winner.owner
 			# Note the winner of this trick, reset the table, and start the next trick
 			@tricks[winner.owner] ||= 0 # Initialise the trick count if it hasn't been created yet
 			@tricks[winner.owner] += 1 # Increment it
 			# Reset the table and set the expectedMove
 			@table = []
 			@expectedMove =
-				type: "move"
-				playerID: @players[0]
+				type: "card"
+				playerID: @players[0] # This should be winner.owner, but we haven't implemented rotation yet
 	calculateScore: () ->
 		# Get the bids
 		bids = @moves[@round-1].slice(0, @playerLimit) # Bids = first [number of players] moves in the round
@@ -159,17 +168,26 @@ class Game
 
 # Helper functions
 
+# Removes all objects in the array that are equal to obj, using Underscore's deep comparison. Returns the last of those objects.
+Array::remove = (obj) ->
+	removed_obj = null
+	_.each @, (o) =>
+		if _.isEqual o, obj
+			@.splice (@.indexOf o), 1
+			removed_obj = o
+	removed_obj
+
 # Returns greatest of the cards given (Ace high). Must be of the same suit.
 max = (cards) ->
-	card = {value: 0}
+	card = {number: 0}
 	for c in cards
-		val = switch c.value
+		val = switch c.number
 			when "A" then 14
 			when "K" then 13
 			when "Q" then 12
 			when "J" then 11
-			else c.value
-		card = c if c.value > card.value
+			else c.number
+		card = c if c.number > card.number
 	return card
 
 # Returns a random suit
@@ -194,12 +212,12 @@ newDeck = () ->
 
 validateBid = (bid, number_of_tricks) ->
 	return (bid > 0 && bid < number_of_tricks)
-validateCardPlayed = (card, hand, trumps, card_led) ->
+validateCardPlayed = (card, hand, trumps, card_led) -> # NOTE: the order of these conditionals is important, don't move them about.
 	if !containsCard(hand, card)
 		console.log "card is not in player's hand", card, hand
 		return false
 	if card.suit == trumps
-		if containsSuit(hand, card_led.suit)
+		if containsSuit(hand, card_led.suit) && card_led.suit != trumps
 			console.log "player is able to follow suit but has not"
 			return false
 		else 

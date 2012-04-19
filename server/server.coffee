@@ -40,12 +40,15 @@ io.sockets.on 'connection', (socket) ->
 		console.log 'move', move
 		# Check the game has begun
 		if !game.begun
-	 		return
+			console.log "game has not begun"
+			return
 		# Check that it is the client's turn
 		if game.expectedTurn? && game.expectedTurn.playerID != playerID
+			console.log "it is not "+playerID+"'s turn"
 			return
 		# Check that the type of move is correct
-		if game.expectedTurn? && game.expectedTurn.type != move.type	
+		if game.expectedTurn? && game.expectedTurn.type != move.type
+			console.log "expected move type "+game.expectedTurn.type+", received "+move.type
 			return
 		game.makeMove move, () ->
 			for p in players
