@@ -20,7 +20,7 @@ app = require('http').createServer (req, res) ->
 
 # SocketIO object
 io = ioLib.listen(app)
-io.set('log level', 3)
+io.set('log level', 1)
 # To get heroku to work
 io.set("transports", ["xhr-polling"]); 
 io.set("polling duration", 10);
@@ -30,7 +30,7 @@ app.listen port
 # Create new game
 game = new Game(2) # playerLimit = 2
 
-players = []
+players = {}
 
 io.sockets.on 'connection', (socket) ->
 	console.log 'connection made'
@@ -58,8 +58,8 @@ io.sockets.on 'connection', (socket) ->
 			console.log "expected move type "+game.expectedTurn.type+", received "+move.type
 			return
 		game.makeMove move, () ->
-			for p in players
-				p.socket.emit 'state', {state: game.getState(p.playerID)}
+			for id, obj of players
+				obj.socket.emit 'state', {state: game.getState(id)}
 
 	# Client asks for game state
 	socket.on 'state', (data) ->
@@ -68,16 +68,20 @@ io.sockets.on 'connection', (socket) ->
 	socket.on 'join', (data) ->
 		console.log 'join', data
 		if game.playerExists data.playerID
+			console.log 'name in use: ', data.playerID
 			return
 		if game.players.length >= game.playerLimit
 			return
 		console.log 'player joining: '+data.playerID
 		game.join data.playerID, () ->
 			playerID = data.playerID
-			players.push {'playerID':data.playerID, 'socket':socket}
+			players[data.playerID] = {'socket':socket, connected:true}
 			socket.broadcast.emit 'join', data
 			data.isme = true
 			socket.emit 'join', data
+	socket.on 'disconnect', () ->
+		console.log 'player disconnected: ', playerID
+		players[playerID].connected == false
 
 game.on 'update', () ->
 	io.sockets.emit 'update'

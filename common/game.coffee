@@ -1,4 +1,4 @@
-_ = require("underscore")._ # Bind all the Underscore.js functions to _ (node uses _)
+_ = require("underscore")._ # Bind all the Underscore.js functions to _
 
 class Game
 	constructor: (@playerLimit) ->
