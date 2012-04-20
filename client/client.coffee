@@ -13,6 +13,8 @@ socket.on 'state', (data) ->
 	_state = data.state
 	if data.state.expectedTurn?.playerID == playerID
 		console.log 'it is your turn'
+		if data.state.expectedTurn.type == "trumps"
+			chooseTrumps()
 	renderHand _state.hand
 	renderTable _state.table
 	bindHand()
@@ -28,10 +30,12 @@ socket.on 'move', (data) ->
 
 socket.on 'gameStart', () ->
 	socket.emit 'state'
-	console.log 'game started'
 
 socket.on 'end', () ->
 	console.log "Game over"
+	socket.emit 'state'
+
+scoket.on 'update', () ->
 	socket.emit 'state'
 
 
@@ -83,6 +87,20 @@ $().ready ->
 		suit = $('input#card_suit').val()
 		card = {number, suit, owner:playerID}
 		move {type:"card", value:card}
+	$('#trumps').css 'display', 'none'
+	for n in [1..4]
+		filename = 'cards/'+n+'.png'
+		suit = ["C", "S", "H", "D"][n-1]
+		$('#trumps').append ('<img class="trumpschoice" id="'+suit+'" src="'+filename+'"></img>')
+
+chooseTrumps = () ->
+	$('.trumpschoice').each () ->
+		$(@).bind 'click', () ->
+			suit = $(@).attr('id')
+			move {type:"trumps", value:suit}
+			$('#trumps').css 'display', 'none'
+	$('#trumps').css 'display', ''
+
 
 bindHand = () ->
 	$('.hand').each () ->

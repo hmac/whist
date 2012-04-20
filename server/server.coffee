@@ -73,8 +73,10 @@ io.sockets.on 'connection', (socket) ->
 			data.isme = true
 			socket.emit 'join', data
 
+game.on 'update', () ->
+	io.sockets.emit 'update'
+
 game.on 'start', () ->
-	console.log 'game started'
 	io.sockets.emit 'gameStart'
 
 game.on 'end', () ->

@@ -2,7 +2,7 @@ _ = require("underscore")._ # Bind all the Underscore.js functions to _ (node us
 
 class Game
 	constructor: (@playerLimit) ->
-		@tricks = {} # A tally of how many tricks each player has won in the round e.g. @tricks[playerID] --> 2
+		@tricks = [] # A tally of how many tricks each player has won in the round e.g. @tricks[@round-1] --> {playerID: tricks, playerID: tricks, ..}
 		@scores = [] # An array of objects showing cumulative score for each round. e.g. @scores[@round-1] --> {playerID: score, playerID: score, ..}
 		@players = []
 		@table = [] # Cards currently 'on table' -- the ones in the current trick
@@ -36,14 +36,23 @@ class Game
 			@start()
 	playerExists: (playerID) ->
 		return @players.indexOf(playerID) != -1
-	start: ->
+	start: (options) ->
 		@begun = true
+		@tricks[@round-1] = {}
 		@deal(@rounds[@round-1])
-		@trumps = randomSuit()
-		@expectedTurn = 
-			type: "bid"
-			playerID: @players[0]
-		@callbacks['start'](@expectedTurn)
+		if @round == 1 # Check if this is the first round
+			@trumps = randomSuit()
+			@expectedTurn = 
+				type: "bid"
+				playerID: @players[0]
+			@callbacks['start']
+		else
+			# Ask the winner of the last round to pick trumps
+			winner = options.winner
+			@expectedTurn =
+				type: "trumps"
+				playerID: winner
+			@callbacks['start']
 	# Callback system
 	callback: (event, data) ->
 		callback = @callbacks[event]
@@ -60,6 +69,12 @@ class Game
 		if !(@validateMove move)
 			console.log "invalid move"
 			return
+		if move.type == "trumps"
+			@trumps = move.value
+			@expectedTurn = 
+				type: "bid"
+				playerID: @players[0]
+			@callbacks['update']
 		@moves[@round-1] ||= []
 		@moves[@round-1].push(move) # Add move to moves list
 		if move.type == 'bid'
@@ -102,8 +117,8 @@ class Game
 			winner = max(cards_played)
 		console.log "winner of trick: ", winner.owner
 		# Note the winner of this trick, reset the table, and start the next trick
-		@tricks[winner.owner] ||= 0 # Initialise the trick count if it hasn't been created yet
-		@tricks[winner.owner] += 1 # Increment it
+		@tricks[@round-1][winner.owner] ||= 0 # Initialise the trick count if it hasn't been created yet
+		@tricks[@round-1][winner.owner] += 1 # Increment it
 		# Work out how many tricks have been played
 		tricks_played = (@moves[@round-1].length/@playerLimit)-1 # -1 because 4 moves at the start are bids
 		if tricks_played == @rounds[@round-1] # This is the last trick
@@ -121,7 +136,7 @@ class Game
 			else
 				# Start the next round
 				@round++
-				@start()
+				@start({winner: winner.owner})
 		else
 			# Reset the table and set the expectedTurn
 			@table = []
@@ -135,7 +150,7 @@ class Game
 		# Get the bids
 		bids = @moves[@round-1].slice(0, @playerLimit) # Bids = first [number of players] moves in the round
 		# SCORE: (tricks < bid) = tricks; (tricks == bid) = tricks+10; (tricks > bid) = bid - tricks;
-		for playerID, tricks of @tricks
+		for playerID, tricks of @tricks[@round-1]
 			bid = bids.filter (move) ->
 				move.playerID == playerID
 			bid = bid[0].value
@@ -160,7 +175,10 @@ class Game
 				return validateLastBid move.value, @rounds[@round-1], prevBids
 			else
 				return validateBid move.value, @rounds[@round-1]
-		else return validateCardPlayed move.value, @cards[move.playerID], @trumps, (@table[0] || move.value)
+		else if move.type == "card"
+			return validateCardPlayed move.value, @cards[move.playerID], @trumps, (@table[0] || move.value)
+		else if move.type == "trumps"
+			return true if _.include ["C", "D", "H", "S"], move.value
 	deal: (number) ->
 		deck = newDeck()
 		for p in @players

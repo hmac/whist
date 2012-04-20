@@ -40,8 +40,9 @@ Client:
 	move:
 		{type, playerID, value}
 		where value is 
-			type == bid  --> int
-			type == card --> {suit, value, owner}
+			type == bid  	--> int
+			type == card 	--> {suit, value, owner}
+			type == trumps 	--> suit
 
 
 Player rotation:
