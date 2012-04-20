@@ -100,6 +100,10 @@ class Game
 			cards_played = cards.filter (card) ->
 				card.suit == suit_led
 			winner = max(cards_played)
+		console.log "winner of trick: ", winner.owner
+		# Note the winner of this trick, reset the table, and start the next trick
+		@tricks[winner.owner] ||= 0 # Initialise the trick count if it hasn't been created yet
+		@tricks[winner.owner] += 1 # Increment it
 		# Work out how many tricks have been played
 		tricks_played = (@moves[@round-1].length/@playerLimit)-1 # -1 because 4 moves at the start are bids
 		if tricks_played == @rounds[@round-1] # This is the last trick
@@ -119,10 +123,6 @@ class Game
 				@round++
 				@start()
 		else
-			console.log "winner of trick: ", winner.owner
-			# Note the winner of this trick, reset the table, and start the next trick
-			@tricks[winner.owner] ||= 0 # Initialise the trick count if it hasn't been created yet
-			@tricks[winner.owner] += 1 # Increment it
 			# Reset the table and set the expectedTurn
 			@table = []
 			@players = shift @players, @players.indexOf(winner.owner) # Shift the order of @players so that the winner is at index 0
@@ -138,10 +138,14 @@ class Game
 		for playerID, tricks of @tricks
 			bid = bids.filter (move) ->
 				move.playerID == playerID
+			bid = bid[0].value
+			console.log 'tricks: ', tricks
+			console.log 'bid: ', bid
 			score = 0
 			score = tricks if tricks < bid
 			score = tricks + 10 if tricks == bid
 			score = bid - tricks if tricks > bid
+			console.log 'score: ', score
 			# Set prevScore to score of previous round if it exists, else set to 0
 			prevScore = if @scores[@round-2]? then @scores[@round-2][playerID] else 0
 			# Total score = score from previous round + score from this round

@@ -89,7 +89,7 @@ bindHand = () ->
 		$(@).bind 'click', () ->
 			cardName = $(@).attr('id')
 			suit = cardName[0]
-			number = cardName[1]
+			number = cardName.slice(1,cardName.length)
 			card = {number, suit, owner:playerID}
 			move {type:"card", value:card}
 
