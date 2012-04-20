@@ -42,3 +42,8 @@ Client:
 		where value is 
 			type == bid  --> int
 			type == card --> {suit, value, owner}
+
+
+Player rotation:
+	Pick [0] for fist trick
+	shift(winner)

@@ -72,10 +72,7 @@ class Game
 					type: "bid"
 					playerID: @players[@players.indexOf(move.playerID)+1]
 		else
-			console.log 'cards: ', @cards[move.playerID]
-			console.log 'card: ', move.value
 			card_removed = @cards[move.playerID].remove(move.value) # Remove card from player's hand
-			console.log "card removed: ", card_removed
 			@table.push(move.value) # Add card to @table -- move.value must be of the form {number, suit, owner}
 			if move.playerID == @players[@players.length-1] # all players have played a card
 				# end trick somehow... calc winner and score etc.
@@ -94,7 +91,7 @@ class Game
 		winner = null
 		suit_led = cards[0].suit
 		# Check if there were any trumps played (they will immediately win)
-		trumps_played = cards.filter (card) ->
+		trumps_played = cards.filter (card) =>
 			card.suit == @trumps
 		if trumps_played.length > 0
 			# Find the highest of the trumps
@@ -106,6 +103,7 @@ class Game
 		# Work out how many tricks have been played
 		tricks_played = (@moves[@round-1].length/@playerLimit)-1 # -1 because 4 moves at the start are bids
 		if tricks_played == @rounds[@round-1] # This is the last trick
+			console.log 'End of round'
 			# Calculate and record scores
 			@calculateScore()
 			# Reset stuff and start the new round
@@ -125,11 +123,14 @@ class Game
 			# Note the winner of this trick, reset the table, and start the next trick
 			@tricks[winner.owner] ||= 0 # Initialise the trick count if it hasn't been created yet
 			@tricks[winner.owner] += 1 # Increment it
-			# Reset the table and set the expectedMove
+			# Reset the table and set the expectedTurn
 			@table = []
-			@expectedMove =
+			@players = shift @players, @players.indexOf(winner.owner) # Shift the order of @players so that the winner is at index 0
+			console.log 'new players order', @players
+			@expectedTurn =
 				type: "card"
-				playerID: @players[0] # This should be winner.owner, but we haven't implemented rotation yet
+				playerID: @players[0]
+			console.log "here"
 	calculateScore: () ->
 		# Get the bids
 		bids = @moves[@round-1].slice(0, @playerLimit) # Bids = first [number of players] moves in the round
@@ -144,7 +145,9 @@ class Game
 			# Set prevScore to score of previous round if it exists, else set to 0
 			prevScore = if @scores[@round-2]? then @scores[@round-2][playerID] else 0
 			# Total score = score from previous round + score from this round
+			@scores[@round-1] = {}
 			@scores[@round-1][playerID] = prevScore + score
+			console.log 'player ', playerID, ' score: ', score
 	validateMove: (move) ->
 		if move.type == "bid"
 			# Get previous bids
@@ -168,6 +171,10 @@ class Game
 
 # Helper functions
 
+# Returns the array shifted so that the object at the chosen index is at the beginning
+shift = (array, index) ->
+	_.rest(array, index).concat _.first(array, index)
+
 # Removes all objects in the array that are equal to obj, using Underscore's deep comparison. Returns the last of those objects.
 Array::remove = (obj) ->
 	removed_obj = null
@@ -186,8 +193,8 @@ max = (cards) ->
 			when "K" then 13
 			when "Q" then 12
 			when "J" then 11
-			else c.number
-		card = c if c.number > card.number
+			else c.number - 0
+		card = c if val > card.number
 	return card
 
 # Returns a random suit

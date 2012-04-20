@@ -5,13 +5,14 @@ Game = require("../common/game.coffee").Game
 
 # Web server
 app = require('http').createServer (req, res) ->
-	console.log req.url
+	# console.log req.url
 	file = null
 	if req.url == "/"
 		file = '/client/index.html'
 	else
 		file = req.url
 	fs.readFile __dirname + '/..' + file, (err, data) ->
+		console.log err if err
 		res.writeHead 200
 		res.end data
 app.listen 3000, 'localhost'

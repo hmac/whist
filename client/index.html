@@ -3,14 +3,27 @@
 	<head>
 		<title>Whist</title>
 
-		<script src="client/lib/socket.io.js"></script>
-		<!-- <script src="client/lib/coffee-script.js"></script> 
-		<script type="text/coffeescript" src="common/game.coffee"></script>
-		<script type="text/coffeescript" src="client/client.coffee"></script> -->
-		<script type="text/javascript" src="common/game.js"></script>
+		<script type="text/javascript" src="client/lib/socket.io.js"></script>
+		<script type="text/javascript" src="client/lib/jquery.js"></script>
 		<script type="text/javascript" src="client/client.js"></script>
 	</head>
 	<body>
-
+		<div id="join">
+			<input type="text" id="name"></input>
+			<input value="Join" type="button" id="join"></input>
+		</div>
+		<div id="bid">
+			<input type="text" id="bid_value"></input>
+			<input value ="Bid" type="button" id="bid"></input>
+		</div>
+		<div id="play_card">
+			<input type="text" id="card_suit"></input>
+			<input type="text" id="card_number"></input>
+			<input value ="Play Card" type="button" id ="play_card"></input>
+		</div>
+		<h4> Table </h4>
+		<div id="table"></div>
+		<h4> Hand </h4>
+		<div id="hand"></div>
 	</body>
 </html>
