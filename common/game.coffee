@@ -8,7 +8,6 @@ class Game
 		@table = [] # Cards currently 'on table' -- the ones in the current trick
 		@trumps = ""
 		@moves = [] # Moves made - both bids and cards. Contains an array for each round.
-		@phase = "bid"
 		@expectedTurn = null # The player and type of move expected. Used by clients to find out whose turn it is.
 		@scores = {} # Scores. A property for each player i.e. @scores[playerID]
 		@begun = false # Has game begun
@@ -22,7 +21,6 @@ class Game
 			table: @table
 			trumps: @trumps
 			expectedTurn: @expectedTurn
-			phase: @phase
 			round: @round
 			players: @players
 			hand: @cards[playerID]

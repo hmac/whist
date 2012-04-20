@@ -3,9 +3,11 @@ ioLib = require("socket.io")
 fs = require 'fs'
 Game = require("../common/game.coffee").Game
 
+port = process.argv[2] || 3000
+
 # Web server
 app = require('http').createServer (req, res) ->
-	# console.log req.url
+	console.log req.url
 	file = null
 	if req.url == "/"
 		file = '/client/index.html'
@@ -15,11 +17,15 @@ app = require('http').createServer (req, res) ->
 		console.log err if err
 		res.writeHead 200
 		res.end data
-app.listen 3000, 'localhost'
 
-#SocketIO object
-io = ioLib.listen(3030)
-io.set('log level', 1)
+# SocketIO object
+io = ioLib.listen(app)
+io.set('log level', 3)
+# To get heroku to work
+io.set("transports", ["xhr-polling"]); 
+io.set("polling duration", 10);
+
+app.listen port
 
 # Create new game
 game = new Game(2) # playerLimit = 2

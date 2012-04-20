@@ -1,4 +1,5 @@
-socket = io.connect 'http://localhost:3030'
+# socket = io.connect 'http://localhost:3030'
+socket = io.connect '/'
 
 playerID = null
 _state = null
@@ -15,7 +16,7 @@ socket.on 'state', (data) ->
 		console.log 'it is your turn'
 		if data.state.expectedTurn.type == "trumps"
 			chooseTrumps()
-	renderHand _state.hand
+	renderHand _state.hand if _state.hand
 	renderTable _state.table
 	bindHand()
 	return
@@ -23,7 +24,8 @@ socket.on 'state', (data) ->
 socket.on 'join', (data) ->
 	console.log 'player joined', data
 	if data.isme
-	  	playerID = data.playerID
+		playerID = data.playerID
+	socket.emit 'state'
 
 socket.on 'move', (data) ->
 	console.log 'move made', data
@@ -35,7 +37,7 @@ socket.on 'end', () ->
 	console.log "Game over"
 	socket.emit 'state'
 
-scoket.on 'update', () ->
+socket.on 'update', () ->
 	socket.emit 'state'
 
 
