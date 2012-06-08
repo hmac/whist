@@ -68,11 +68,13 @@ class Game
 			console.log "invalid move"
 			return
 		if move.type == "trumps"
+			console.log 'trumps move'
 			@trumps = move.value
 			@expectedTurn = 
 				type: "bid"
 				playerID: @players[0]
 			@callbacks['update']
+			return
 		@moves[@round-1] ||= []
 		@moves[@round-1].push(move) # Add move to moves list
 		if move.type == 'bid'

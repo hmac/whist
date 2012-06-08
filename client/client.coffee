@@ -3,6 +3,7 @@ socket = io.connect '/'
 
 playerID = null
 _state = null
+joined = false
 
 # Get initial game state
 socket.on 'start', (data) ->
@@ -19,12 +20,14 @@ socket.on 'state', (data) ->
 	renderHand _state.hand if _state.hand
 	renderTable _state.table
 	bindHand()
+	renderTable
 	return
 
 socket.on 'join', (data) ->
 	console.log 'player joined', data
 	if data.isme
 		playerID = data.playerID
+		joined = true
 	socket.emit 'state'
 
 socket.on 'move', (data) ->
@@ -42,6 +45,7 @@ socket.on 'update', () ->
 
 
 join = (ID) ->
+	return if joined
 	playerID = ID
 	socket.emit 'join', {playerID: ID}
 getState = () ->
@@ -124,6 +128,22 @@ renderTable = (table) ->
 	for c in table
 		f = cardFile c
 		$('#table').append('<img src="'+f+'"></img>')
+
+renderState = () ->
+	players = []
+	for p, i in _state.players
+		if _state.expectedTurn.playerID == p
+			turn = true
+		else turn = false
+		name = p
+		tricks = _state.tricks[_state.round-1]?[p] or 0
+		score = _state.score[_state.round-1]?[p] or 0
+		turn = turn
+		obj = {name, tricks, score, turn}
+		players.push obj
+	template = $('#state_template').html()
+	table = _.template(template, players)
+	$('#state.').html(table)
 
 window.playerID = player_name
 window.state = state

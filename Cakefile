@@ -11,6 +11,5 @@ run = () ->
 		throw err if err
 		console.log stdout + stderr
 
-task 'build', 'Compile client.coffee and run server', ->
+task 'build', 'Compile client.coffee', ->
 	compile()
-	run()

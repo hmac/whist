@@ -5,9 +5,11 @@ Game = require("../common/game.coffee").Game
 
 port = process.argv[2] || 3000
 
+num_players = process.argv[3] || 2
+
 # Web server
 app = require('http').createServer (req, res) ->
-	console.log req.url
+	# console.log req.url
 	file = null
 	if req.url == "/"
 		file = '/client/index.html'
@@ -28,7 +30,7 @@ io.set("polling duration", 10);
 app.listen port
 
 # Create new game
-game = new Game(2) # playerLimit = 2
+game = new Game(num_players) # playerLimit
 
 players = {}
 

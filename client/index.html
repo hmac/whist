@@ -5,6 +5,7 @@
 
 		<script type="text/javascript" src="client/lib/socket.io.js"></script>
 		<script type="text/javascript" src="client/lib/jquery.js"></script>
+		<script type="text/javascript" src="client/lib/underscore.js"></script>
 		<script type="text/javascript" src="client/client.js"></script>
 	</head>
 	<body>
@@ -16,7 +17,8 @@
 			<input type="text" id="bid_value"></input>
 			<input value ="Bid" type="button" id="bid"></input>
 		</div>
-		<div id="trumps"></div>
+		<div id="state"></div>
+		<div id="trumps"><h4>Pick Trumps:</h4></div>
 		<!-- <div id="play_card">
 			<input type="text" id="card_suit"></input>
 			<input type="text" id="card_number"></input>
@@ -26,5 +28,26 @@
 		<div id="table"></div>
 		<h4> Hand </h4>
 		<div id="hand"></div>
+
+		<script type="text/html" id="state_template">
+			<table>
+				<tbody>
+					<tr>
+						<td>Players</td>
+						<td>Tricks</td>
+						<td>Score</td>
+						<td>Turn</td>
+					</tr>
+					{{ for(var i = 0; i < players.length; i++) { }}
+					<tr>
+						<td>{{players[i].name}}</td>
+						<td>{{players[i].tricks}}</td>
+						<td>{{players[i].score}}</td>
+						<td>{{ if players[i].turn {"--"} }}</td>
+					</tr>
+					{{ } }}
+				</tbody>
+			</table>
+		</script>
 	</body>
 </html>
