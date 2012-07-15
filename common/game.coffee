@@ -166,11 +166,12 @@ class Game
 			score = bid - tricks if tricks > bid
 			console.log 'score: ', score
 			# Set prevScore to score of previous round if it exists, else set to 0
-			prevScore = if @scores[@round-2]? then @scores[@round-2][playerID] else 0 # I think this should be [@round-1]...
-			# Total score = score from previous round + score from this round
+			prevScore = @scores[playerID]
 			@scores[@round-1] = {}
 			@scores[@round-1][playerID] = prevScore + score
-			console.log 'player ', playerID, ' score: ', score
+			@scores[playerID] = @scores[@round-1][playerID]
+		for playerID in @players
+			console.log 'player ', playerID, ' score: ', @scores[playerID]
 	validateMove: (move) ->
 		if move.type == "bid"
 			# Get previous bids
