@@ -18,6 +18,7 @@ class Game
 		@round = 1 # The current round
 	getState: (playerID) ->
 		state =
+			playerLimit: @playerLimit
 			table: @table
 			trumps: @trumps
 			expectedTurn: @expectedTurn
@@ -35,6 +36,7 @@ class Game
 	playerExists: (playerID) ->
 		return @players.indexOf(playerID) != -1
 	start: (options) ->
+		console.log 'start'
 		@begun = true
 		@tricks[@round-1] = {}
 		@deal(@rounds[@round-1])
@@ -149,7 +151,9 @@ class Game
 	calculateScore: () ->
 		# Get the bids
 		bids = @moves[@round-1].slice(0, @playerLimit) # Bids = first [number of players] moves in the round
-		# SCORE: (tricks < bid) = tricks; (tricks == bid) = tricks+10; (tricks > bid) = bid - tricks;
+		# SCORE: 	(tricks < bid) = tricks; 
+		#			(tricks == bid) = tricks+10; 
+		#			(tricks > bid) = bid - tricks;
 		for playerID, tricks of @tricks[@round-1]
 			bid = bids.filter (move) ->
 				move.playerID == playerID
@@ -162,7 +166,7 @@ class Game
 			score = bid - tricks if tricks > bid
 			console.log 'score: ', score
 			# Set prevScore to score of previous round if it exists, else set to 0
-			prevScore = if @scores[@round-2]? then @scores[@round-2][playerID] else 0
+			prevScore = if @scores[@round-2]? then @scores[@round-2][playerID] else 0 # I think this should be [@round-1]...
 			# Total score = score from previous round + score from this round
 			@scores[@round-1] = {}
 			@scores[@round-1][playerID] = prevScore + score
