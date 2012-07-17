@@ -167,7 +167,7 @@ class Game
 			console.log 'score: ', score
 			# Set prevScore to score of previous round if it exists, else set to 0
 			prevScore = @scores[playerID]
-			@scores[@round-1] = {}
+			@scores[@round-1] ?= {} # create this object unless it already exists (it won't on the first iteration of this loop)
 			@scores[@round-1][playerID] = prevScore + score
 			@scores[playerID] = @scores[@round-1][playerID]
 		for playerID in @players

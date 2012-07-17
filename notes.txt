@@ -33,7 +33,7 @@ concludeTrick:
 		reset
 
 
-TODO: 	Have winner of previous round choose trumps
+TODO: 	Have winner of previous round choose trumps DONE
 		Have dealer rotate
 
 Client:
