@@ -358,7 +358,7 @@
   };
 
   validateBid = function(bid, number_of_tricks) {
-    return bid >= 0 && bid < number_of_tricks;
+    return bid >= 0 && bid <= number_of_tricks;
   };
 
   validateCardPlayed = function(card, hand, trumps, card_led) {
