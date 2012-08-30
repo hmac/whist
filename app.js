@@ -45,13 +45,13 @@
 
   io.sockets.on('connection', function(socket) {
     var playerID;
-    console.log('connection made');
     playerID = null;
+
     socket.emit('start', {
       state: game.getState(playerID)
     });
+
     socket.on('move', function(move) {
-      console.log('move', move);
       if (!game.begun) {
         console.log("game has not begun");
         return;
@@ -64,21 +64,15 @@
         console.log("expected move type " + game.expectedTurn.type + ", received " + move.type);
         return;
       }
-      return game.makeMove(move, function() {
-        var id, obj, _results;
-        for (id in players) {
-          obj = players[id];
-          obj.socket.emit('state', {
-            state: game.getState(id)
-          });
-        }
-      });
+      return game.makeMove(move, emitState);
     });
+
     socket.on('state', function(data) {
       return socket.emit('state', {
         state: game.getState(playerID)
       });
     });
+
     socket.on('join', function(data) {
       console.log('join', data);
       if (game.playerExists(data.playerID)) {
@@ -88,7 +82,6 @@
       if (game.players.length >= game.playerLimit) {
         return;
       }
-      console.log('player joining: ' + data.playerID);
       game.join(data.playerID, function() {
         playerID = data.playerID;
         players[data.playerID] = {
@@ -100,14 +93,16 @@
         return socket.emit('join', data);
       });
     });
+
     socket.on('disconnect', function() {
-      console.log('player disconnected: ', playerID);
+      console.log('socket disconnected: ', socket);
       playerID && (players[playerID].connected = false);
     });
+
   });
 
   game.on('update', function() {
-    return io.sockets.emit('update');
+    emitState();
   });
 
   game.on('start', function() {
@@ -118,5 +113,13 @@
     console.log('game ended');
     return io.sockets.emit('end');
   });
+
+  var emitState = function() {
+    for (var id in players) {
+      players[id].socket.emit('state', {
+        state: game.getState(id)
+      });
+    }
+  }
 
 }).call(this);

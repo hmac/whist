@@ -262,44 +262,29 @@
     }
   })
 
-  socket.on('start', function(data) {
-    console.log('state received', data);
-    return _state = data.state;
-  });
+  /*
+    Socket.IO Events
+  */
 
   socket.on('state', function(data) {
-    console.log('state update', data);
     _state = data.state;
-    var _ref;
-    if (((_ref = data.state.expectedTurn) != null ? _ref.playerID : void 0) === playerID) {
-      console.log('it is your turn');
-    }
   });
 
   socket.on('join', function(data) {
-    console.log('player joined', data);
     if (data.isme) {
       playerID = data.playerID;
       joined = true;
     }
-    return socket.emit('state');
-  });
-
-  socket.on('move', function(data) {
-    return console.log('move made', data);
+    socket.emit('state');
   });
 
   socket.on('gameStart', function() {
-    return socket.emit('state');
+    socket.emit('state');
   });
 
   socket.on('end', function() {
     console.log("Game over");
-    return socket.emit('state');
-  });
-
-  socket.on('update', function() {
-    return socket.emit('state');
+    socket.emit('state');
   });
 
   move = function(move) {
