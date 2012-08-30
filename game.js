@@ -104,10 +104,12 @@
       var card_removed, _base, _name;
       console.log('makeMove');
       if (!(move.type === this.expectedTurn.type && move.playerID === this.expectedTurn.playerID)) {
+        cb();
         return;
       }
       if (!(this.validateMove(move))) {
         console.log("invalid move");
+        cb();
         return;
       }
       if (move.type === "trumps") {
@@ -356,7 +358,7 @@
   };
 
   validateBid = function(bid, number_of_tricks) {
-    return bid > 0 && bid < number_of_tricks;
+    return bid >= 0 && bid < number_of_tricks;
   };
 
   validateCardPlayed = function(card, hand, trumps, card_led) {
