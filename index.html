@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Whist</title>
+
+		<link rel="stylesheet" href="bootstrap.css">
+		<link rel="stylesheet" href="style.css">
+
+		<script type="text/javascript" src="lib/socket.io.js"></script>
+		<script type="text/javascript" src="lib/jquery.js"></script>
+		<script type="text/javascript" src="lib/underscore.js"></script>
+		<script type="text/javascript" src="lib/backbone.js"></script>
+		<script type="text/javascript" src="client.js"></script>
+	</head>
+	<body>
+		<div id="join">
+			<input type="text" id="name"></input>
+			<input value="Join" type="button" id="join"></input>
+		</div>
+<!-- 		<div id="bid">
+			<input type="text" id="bid_value"></input>
+			<input value ="Bid" type="button" id="bid"></input>
+		</div> -->
+		<div id="state"></div>
+		<div id="players"><h4>Players:</h4></div>
+		<div id="trumps"><h4>Pick Trumps:</h4></div>
+		<h4> Table </h4>
+		<div id="table" class="well cards"></div>
+		<div class="well" id="place_bid">
+			<h4>Place bid</h4>
+			<input type="button" class="btn btn-large" value="0"></input>
+			<input type="button" class="btn btn-large" value="1"></input>
+			<input type="button" class="btn btn-large" value="2"></input>
+			<input type="button" class="btn btn-large" value="3"></input>
+			<input type="button" class="btn btn-large" value="4"></input>
+			<input type="button" class="btn btn-large" value="5"></input>
+			<input type="button" class="btn btn-large" value="6"></input>
+			<input type="button" class="btn btn-large" value="7"></input>
+			<input type="button" class="btn btn-large" value="8"></input>
+			<input type="button" class="btn btn-large" value="9"></input>
+			<input type="button" class="btn btn-large" value="10"></input>
+			<input type="button" class="btn btn-large" value="11"></input>
+			<input type="button" class="btn btn-large" value="12"></input>
+			<input type="button" class="btn btn-large" value="13"></input>
+			</div>
+		<h4> Hand </h4>
+		<div id="hand" class="well cards"></div>
+		<h4> Trumps </h4>
+		<div id="trumps_display"> </div>
+		<script type="text/html" id="state_template">
+			<table>
+				<tbody>
+					<tr>
+						<td>Players</td>
+						<td>Tricks</td>
+						<td>Score</td>
+						<td>Turn</td>
+					</tr>
+					{{ for(var i = 0; i < players.length; i++) { }}
+					<tr>
+						<td>{{players[i].name}}</td>
+						<td>{{players[i].tricks}}</td>
+						<td>{{players[i].score}}</td>
+						<td>{{ if players[i].turn {"--"} }}</td>
+					</tr>
+					{{ } }}
+				</tbody>
+			</table>
+		</script>
+	</body>
+</html>
