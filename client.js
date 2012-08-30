@@ -1,13 +1,12 @@
 (function(_, Backbone, $) {
-  var cardFile, getState, join, joined, move, playerID, player_name, socket, state, _state;
 
-  socket = io.connect('/');
+  var socket = io.connect('/');
 
-  playerID = null;
+  var playerID = null;
 
-  _state = null;
+  var _state = null;
 
-  joined = false;
+  var joined = false;
 
   /*
     Models
@@ -123,29 +122,20 @@
   });
 
   var TrumpsPickerView = Backbone.View.extend({
-    trumps: {'C': 1, 'S': 2, 'H': 3, 'D': 4}, // suits and their filenames
-    render: function() {
-      var self = this;
-      _.each(this.trumps, function(index, trump) {
-        var view = new CardView({
-          imgsrc: 'cards/'+index+'.png',
-          trump: trump,
-          events: {
-            'click': function() {
-              move({
-                type: "trumps",
-                value: this.trump
-              });
-              this.trigger('click');
-            }
-          }
-        });
-        view.on('click', function(){
-          self.remove()
-        });
-        view.render();
-        self.$el.append(view.el);
+    events: {
+      'click img': 'pickTrumps'
+    },
+    pickTrumps: function(e) {
+      var trump = e.target.id;
+      move({
+        type: "trumps",
+        value: trump
       });
+      this.setVisible(false);
+    },
+    setVisible: function(vis) {
+      var disp = vis ? "block" : "none";
+      this.$el.css('display', disp);      
     }
   });
 
@@ -230,7 +220,9 @@
         el: $('#table')
       });
 
-      var trumpsPickerView = new TrumpsPickerView();
+      var trumpsPickerView = new TrumpsPickerView({
+        el: $('#trumps')
+      });
 
       var trumpsView = new TrumpsView({
         el: $('#trumps_display')
@@ -310,31 +302,9 @@
     return socket.emit('state');
   });
 
-  join = function(ID) {
-    if (joined) {
-      return;
-    }
-    playerID = ID;
-    return socket.emit('join', {
-      playerID: ID
-    });
-  };
-
-  getState = function() {
-    return socket.emit('state');
-  };
-
   move = function(move) {
     move.playerID = playerID;
     return socket.emit('move', move);
-  };
-
-  state = function() {
-    return _state;
-  };
-
-  player_name = function() {
-    return playerID;
   };
 
   cardFile = function(card) {
@@ -368,20 +338,6 @@
 
     var app = new App();
 
-    // $('input#join').bind('click', function() {
-    //   return join($('input#name').val());
-    // });
-
   });
-
-  window.playerID = player_name;
-
-  window.state = state;
-
-  window.join = join;
-
-  window.getState = getState;
-
-  window.move = move;
 
 })(_, Backbone, jQuery);
