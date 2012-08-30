@@ -154,20 +154,13 @@
       socket.on('state', _.bind(this.render, this));
     },
     render: function() {
-      var t = "";
-      switch (_state.trumps) {
-        case "C":
-          t = "Clubs";
-          break;
-        case "D":
-          t = "Diamonds";
-          break;
-        case "H":
-          t = "Hearts";
-          break;
-        case "S":
-          t = "Spades";
-      }
+      var trumps = {
+        "C": "Clubs",
+        "D": "Diamonds",
+        "H": "Hearts",
+        "S": "Spades"
+      };
+      var t = trumps[_state.trumps];
       this.$el.html(t);
     }
   });
