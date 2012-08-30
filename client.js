@@ -48,17 +48,6 @@
     }
   });
 
-  var Players = Backbone.Collection.extend({
-    model: Player,
-    sync: function(method, model, options) {
-      _state && options.success(_state.players);
-    },
-    initialize: function() {
-      var self = this;
-      socket.on('state', _.bind(this.fetch, this));
-    }
-  });
-
   /*
     Views
   */
@@ -155,20 +144,6 @@
     }
   });
 
-  var PlayersView = Backbone.View.extend({
-    initialize: function() {
-      this.collection.on('reset', _.bind(this.render, this));
-    },
-    render: function() {
-      this.$el.empty();
-      var self = this;
-      this.collection.each(function(player) {
-        var elem = $('<li>'+player.get('playerID')+'</li>');
-        self.$el.append(elem);
-      });
-    }
-  });
-
   var BidView = Backbone.View.extend({
     events: {
       'click .btn': 'placeBid'
@@ -204,6 +179,28 @@
     }
   });
 
+  var StateView = Backbone.View.extend({
+    initialize: function(options) {
+      this.template = _.template($('#state_template').html());
+      socket.on('state', _.bind(this.render, this));
+    },
+    render: function() {
+      var players = [];
+      var tricks = _state.tricks[_state.tricks.length-1];
+      _.each(_state.players, function(playerID) {
+        var p = {
+          playerID: playerID,
+          score: _state.scores[playerID],
+          tricks: tricks && tricks[playerID] ? tricks[playerID] : 0
+        };
+        players.push(p);
+      });
+      this.$el.html(this.template({
+        players: players
+      }));
+    }
+  });
+
   /*
     Main App View
   */
@@ -228,12 +225,6 @@
         el: $('#trumps_display')
       });
 
-      var playersView = new PlayersView({
-        collection: new Players(),
-        tagName: 'ul'
-      });
-      $('#players').append(playersView.el);
-
       var bidView = new BidView({
         el: $('#place_bid')
       });
@@ -241,6 +232,10 @@
 
       var joinView = new JoinView({
         el: $('#join')
+      });
+
+      var stateView = new StateView({
+        el: $('#state')
       });
 
       socket.on('state', function(data) {
@@ -258,6 +253,9 @@
         else {
           $('#turn').css('display', 'none');
         }
+
+        $('#round').html('Round '+_state.round);
+        $('#round').css('display', 'block');
       });
     }
   })
@@ -324,5 +322,7 @@
     var app = new App();
 
   });
+
+  window.state = function() { return _state };
 
 })(_, Backbone, jQuery);

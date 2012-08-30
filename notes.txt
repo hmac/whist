@@ -35,6 +35,8 @@ concludeTrick:
 
 TODO: 	Have winner of previous round choose trumps DONE
 		Have dealer rotate
+		Sometimes the game picks the wrong person as the winner of a trick
+		If the client disconnects and reconnects this causes problems
 
 Client:
 	move:

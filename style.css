@@ -5,3 +5,16 @@
 div#turn {
 	float: right;
 }
+
+div#round {
+	float: left;
+}
+
+div#state {
+	padding-top: 54px;
+}
+
+img.hand {
+	margin-left: 5px;
+	margin-right: 5px;
+}

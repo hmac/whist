@@ -14,12 +14,12 @@
 	</head>
 	<body>
 		<div id="turn" class="alert alert-info" style="display:none">It is your turn</div>
+		<div id="round" class="alert alert-success" style="display:none"></div>
 		<div id="join">
 			<input type="text" id="name"></input>
 			<input value="Join" type="button" id="join"></input>
 		</div>
 		<div id="state"></div>
-		<div id="players"><h4>Players:</h4></div>
 		<div id="trumps" style="display:none">
 			<h4>Pick Trumps:</h4>
 			<img id="C" src="cards/1.png">
@@ -51,22 +51,20 @@
 		<h4> Trumps </h4>
 		<div id="trumps_display"> </div>
 		<script type="text/html" id="state_template">
-			<table>
+			<table class="table table-striped">
 				<tbody>
 					<tr>
 						<td>Players</td>
 						<td>Tricks</td>
 						<td>Score</td>
-						<td>Turn</td>
 					</tr>
-					{{ for(var i = 0; i < players.length; i++) { }}
+					<% for (var i = 0; i < players.length; i++) { %>
 					<tr>
-						<td>{{players[i].name}}</td>
-						<td>{{players[i].tricks}}</td>
-						<td>{{players[i].score}}</td>
-						<td>{{ if players[i].turn {"--"} }}</td>
+						<td> <%- players[i].playerID %> </td>
+						<td> <%- players[i].tricks %> </td>
+						<td> <%- players[i].score %> </td>
 					</tr>
-					{{ } }}
+					<% } %>
 				</tbody>
 			</table>
 		</script>
