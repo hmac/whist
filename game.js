@@ -386,7 +386,7 @@
   };
 
   validateLastBid = function(bid, number_of_tricks, previousBids) {
-    return validateBid(bid, number_of_tricks) && bid !== number_of_tricks - sum(previousBids);
+    return validateBid(bid, number_of_tricks) && bid !== number_of_tricks - sum(_.pluck(previousBids, 'value'));
   };
 
   containsSuit = function(cards, suit) {
@@ -412,11 +412,9 @@
   };
 
   sum = function(array) {
-    var n, t, _i, _len;
-    t = 0;
-    for (_i = 0, _len = array.length; _i < _len; _i++) {
-      n = array[_i];
-      t += n;
+    var t = 0
+    for (var i = 0; i < array.length; i++) {
+      t += array[i];
     }
     return t;
   };
