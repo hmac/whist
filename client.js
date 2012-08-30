@@ -1,5 +1,5 @@
 (function(_, Backbone, $) {
-  var bindHand, cardFile, chooseTrumps, getState, join, joined, move, playerID, player_name, renderHand, renderState, renderTable, showTrumps, socket, state, _state;
+  var cardFile, getState, join, joined, move, playerID, player_name, socket, state, _state;
 
   socket = io.connect('/');
 
@@ -8,6 +8,10 @@
   _state = null;
 
   joined = false;
+
+  /*
+    Models
+  */
 
   var Card = Backbone.Model.extend({
 
@@ -20,6 +24,10 @@
       };
     }
   })
+
+  /*
+    Collections
+  */
 
   var Hand = Backbone.Collection.extend({
     sync: function(method, model, options) {
@@ -51,6 +59,10 @@
       socket.on('state', _.bind(this.fetch, this));
     }
   });
+
+  /*
+    Views
+  */
 
   var CardListView = Backbone.View.extend({
     initialize: function() {
@@ -192,6 +204,27 @@
     }
   });
 
+  var JoinView = Backbone.View.extend({
+    events: {
+    'click input#join': 'join'      
+    },
+    join: function(e) {
+      var id = this.$('input#name').val();
+      if (joined) {
+        return;
+      }
+      playerID = id;
+      socket.emit('join', {
+        playerID: id
+      });
+      this.remove();
+    }
+  });
+
+  /*
+    Main App View
+  */
+
   var App = Backbone.View.extend({
     initialize: function() {
       var handView = new HandView({
@@ -221,6 +254,10 @@
       });
       bidView.setVisible(false);
 
+      var joinView = new JoinView({
+        el: $('#join')
+      });
+
       socket.on('state', function(data) {
         var e = (data.state.expectedTurn != null) ? data.state.expectedTurn : void 0;
         if (e && e.playerID === playerID && e.type === "trumps") {
@@ -229,6 +266,12 @@
         }
         if (e && e.playerID === playerID && e.type === "bid") {
           bidView.setVisible(true);
+        }
+        if (e && e.playerID === playerID) {
+          $('#turn').css('display', 'block');
+        }
+        else {
+          $('#turn').css('display', 'none');
         }
       });
     }
@@ -240,22 +283,12 @@
   });
 
   socket.on('state', function(data) {
-    var _ref;
     console.log('state update', data);
     _state = data.state;
+    var _ref;
     if (((_ref = data.state.expectedTurn) != null ? _ref.playerID : void 0) === playerID) {
       console.log('it is your turn');
-      if (data.state.expectedTurn.type === "trumps") {
-        // chooseTrumps();
-      }
     }
-    if (_state.hand) {
-      // renderHand(_state.hand);
-    }
-    // renderTable(_state.table);
-    // bindHand();
-    // showTrumps();
-    // renderState();
   });
 
   socket.on('join', function(data) {
@@ -312,186 +345,41 @@
   };
 
   cardFile = function(card) {
-    var filename, n, suit_n;
-    n = (function() {
-      switch (card.number) {
-        case "A":
-          return 1;
-        case "K":
-          return 2;
-        case "Q":
-          return 3;
-        case "J":
-          return 4;
-        case "10":
-          return 5;
-        case "9":
-          return 6;
-        case "8":
-          return 7;
-        case "7":
-          return 8;
-        case "6":
-          return 9;
-        case "5":
-          return 10;
-        case "4":
-          return 11;
-        case "3":
-          return 12;
-        case "2":
-          return 13;
-      }
-    })();
-    suit_n = (function() {
-      switch (card.suit) {
-        case "C":
-          return 1;
-        case "S":
-          return 2;
-        case "H":
-          return 3;
-        case "D":
-          return 4;
-      }
-    })();
-    return filename = 'cards/' + ((4 * (n - 1)) + suit_n) + '.png';
+    var numbers = {
+      "A": 1,
+      "K": 2,
+      "Q": 3,
+      "J": 4,
+      "10": 5,
+      "9": 6,
+      "8": 7,
+      "7": 8,
+      "6": 9,
+      "5": 10,
+      "4": 11,
+      "3": 12,
+      "2": 13
+    };
+    var n = numbers[card.number];
+    var suits = {
+      "C": 1,
+      "S": 2,
+      "H": 3,
+      "D": 4
+    };
+    var suit_n = suits[card.suit];
+    return 'cards/' + ((4 * (n - 1)) + suit_n) + '.png';
   };
 
   $().ready(function() {
 
     var app = new App();
 
+    // $('input#join').bind('click', function() {
+    //   return join($('input#name').val());
+    // });
 
-    var filename, n, suit, _i, _results;
-    $('input#join').bind('click', function() {
-      return join($('input#name').val());
-    });
-    // $('input#bid').bind('click', function() {
-    //   var value;
-    //   value = $('input#bid_value').val() - 0;
-    //   return move({
-    //     type: "bid",
-    //     value: value
-    //   });
-    // });
-    // $('input#play_card').bind('click', function() {
-    //   var card, number, suit;
-    //   number = $('input#card_number').val();
-    //   suit = $('input#card_suit').val();
-    //   card = {
-    //     number: number,
-    //     suit: suit,
-    //     owner: playerID
-    //   };
-    //   return move({
-    //     type: "card",
-    //     value: card
-    //   });
-    // });
-    // $('#trumps').css('display', 'none');
-    // for (n = _i = 1; _i <= 4; n = ++_i) {
-    //   filename = 'cards/' + n + '.png';
-    //   suit = ["C", "S", "H", "D"][n - 1];
-    //   $('#trumps').append('<img class="trumpschoice" id="' + suit + '" src="' + filename + '"></img>');
-    // }
   });
-
-  // chooseTrumps = function() {
-  //   $('.trumpschoice').each(function() {
-  //     return $(this).bind('click', function() {
-  //       var suit;
-  //       suit = $(this).attr('id');
-  //       move({
-  //         type: "trumps",
-  //         value: suit
-  //       });
-  //       return $('#trumps').css('display', 'none');
-  //     });
-  //   });
-  //   return $('#trumps').css('display', '');
-  // };
-
-  // bindHand = function() {
-  //   return $('.hand').each(function() {
-  //     return $(this).bind('click', function() {
-  //       var card, cardName, number, suit;
-  //       cardName = $(this).attr('id');
-  //       suit = cardName[0];
-  //       number = cardName.slice(1, cardName.length);
-  //       card = {
-  //         number: number,
-  //         suit: suit,
-  //         owner: playerID
-  //       };
-  //       return move({
-  //         type: "card",
-  //         value: card
-  //       });
-  //     });
-  //   });
-  // };
-
-  // renderTable = function(table) {
-  //   var c, f, _i, _len, _results;
-  //   $('#table').empty();
-  //   _results = [];
-  //   for (_i = 0, _len = table.length; _i < _len; _i++) {
-  //     c = table[_i];
-  //     f = cardFile(c);
-  //     _results.push($('#table').append('<img src="' + f + '"></img>'));
-  //   }
-  //   return _results;
-  // };
-
-  // renderState = function() {
-  //   var i, name, obj, p, players, score, table, template, tricks, turn, _i, _len, _ref, _ref1, _ref2;
-  //   if (!(_state.expectedTurn != null) || !(_state.score != null)) {
-  //     return;
-  //   }
-  //   players = [];
-  //   _ref = _state.players;
-  //   for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-  //     p = _ref[i];
-  //     if (_state.expectedTurn.playerID === p) {
-  //       turn = true;
-  //     } else {
-  //       turn = false;
-  //     }
-  //     name = p;
-  //     tricks = ((_ref1 = _state.tricks[_state.round - 1]) != null ? _ref1[p] : void 0) || 0;
-  //     score = ((_ref2 = _state.score[_state.round - 1]) != null ? _ref2[p] : void 0) || 0;
-  //     turn = turn;
-  //     obj = {
-  //       name: name,
-  //       tricks: tricks,
-  //       score: score,
-  //       turn: turn
-  //     };
-  //     players.push(obj);
-  //   }
-  //   template = $('#state_template').html();
-  //   table = _.template(template, players);
-  //   return $('#state.').html(table);
-  // };
-
-  // showTrumps = function() {
-  //   var t;
-  //   switch (_state.trumps) {
-  //     case "C":
-  //       t = "Clubs";
-  //       break;
-  //     case "D":
-  //       t = "Diamonds";
-  //       break;
-  //     case "H":
-  //       t = "Hearts";
-  //       break;
-  //     case "S":
-  //       t = "Spades";
-  //   }
-  //   return $('#trumps_display').html(t);
-  // };
 
   window.playerID = player_name;
 

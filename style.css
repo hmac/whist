@@ -1,3 +1,7 @@
 .cards {
 	height: 96px;
 }
+
+div#turn {
+	float: right;
+}
