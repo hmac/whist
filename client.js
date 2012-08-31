@@ -241,8 +241,7 @@
       socket.on('state', function(data) {
         var e = (data.state.expectedTurn != null) ? data.state.expectedTurn : void 0;
         if (e && e.playerID === playerID && e.type === "trumps") {
-          $('#trumps').append(trumpsPickerView.el);
-          trumpsPickerView.render();
+          trumpsPickerView.setVisible(true);
         }
         if (e && e.playerID === playerID && e.type === "bid") {
           bidView.setVisible(true);
@@ -253,9 +252,10 @@
         else {
           $('#turn').css('display', 'none');
         }
-
-        $('#round').html('Round '+_state.round);
-        $('#round').css('display', 'block');
+        if (e) {
+          $('#round').html('Round '+_state.round);
+          $('#round').css('display', 'block');
+        }
       });
     }
   })
@@ -273,10 +273,6 @@
       playerID = data.playerID;
       joined = true;
     }
-    socket.emit('state');
-  });
-
-  socket.on('gameStart', function() {
     socket.emit('state');
   });
 

@@ -1,5 +1,5 @@
 .cards {
-	height: 96px;
+	min-height: 96px;
 }
 
 div#turn {
