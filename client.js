@@ -6,8 +6,6 @@
 
   var _state = null;
 
-  var joined = false;
-
   /*
     Models
   */
@@ -162,23 +160,6 @@
     }
   });
 
-  var JoinView = Backbone.View.extend({
-    events: {
-    'click input#join': 'join'      
-    },
-    join: function(e) {
-      var id = this.$('input#name').val();
-      if (joined) {
-        return;
-      }
-      playerID = id;
-      socket.emit('join', {
-        playerID: id
-      });
-      this.remove();
-    }
-  });
-
   var StateView = Backbone.View.extend({
     initialize: function(options) {
       this.template = _.template($('#state_template').html());
@@ -201,6 +182,40 @@
       }));
     }
   });
+
+  var AuthView = Backbone.View.extend({
+    events: {
+      'click #auth-submit': 'login',
+      'click #auth-new-submit': 'createNew'
+    },
+    initialize: function() {
+      var el = this.$el;
+      socket.once('join', function(data) {
+        playerID = data.playerID;
+        el.modal('hide');
+        socket.emit('state');
+      });
+      this.$el.modal();
+    },
+    login: function() {
+      var id = this.$('#auth-user').val();
+      var pass = this.$('#auth-pass').val();
+
+      socket.emit('rejoin', {
+        playerID: id,
+        password: pass
+      });
+    },
+    createNew: function() {
+      var id = this.$('#auth-new-user').val();
+      var pass = this.$('#auth-new-pass').val();
+
+      socket.emit('join', {
+        playerID: id,
+        password: pass
+      });
+    }
+  })
 
   /*
     Main App View
@@ -231,12 +246,12 @@
       });
       bidView.setVisible(false);
 
-      var joinView = new JoinView({
-        el: $('#join')
-      });
-
       var stateView = new StateView({
         el: $('#state')
+      });
+
+      var authView = new AuthView({
+        el: $('#auth')
       });
 
       socket.on('state', function(data) {
@@ -267,14 +282,6 @@
 
   socket.on('state', function(data) {
     _state = data.state;
-  });
-
-  socket.on('join', function(data) {
-    if (data.isme) {
-      playerID = data.playerID;
-      joined = true;
-    }
-    socket.emit('state');
   });
 
   socket.on('end', function() {

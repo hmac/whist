@@ -76,17 +76,40 @@
         console.log('number of players has reached game limit');
         return;
       }
+      if (!data.playerID || !data.password) {
+        console.log("Invalid playerID or password");
+        return;
+      }
       game.join(data.playerID, function() {
         playerID = data.playerID;
         players[data.playerID] = {
           'socket': socket,
+          password: data.password,
           connected: true
         };
-        socket.broadcast.emit('join', data);
-        data.isme = true;
-        socket.emit('join', data);
+        socket.emit('join', {
+          playerID: playerID
+        });
       });
     });
+
+    socket.on('rejoin', function(data) {
+      console.log('rejoin', data);
+      if (!game.playerExists(data.playerID)) {
+        console.log('player does not exist');
+        return;
+      }
+      if (players[data.playerID].password !== data.password) {
+        console.log('password incorrect');
+        return;
+      }
+      playerID = data.playerID;
+      players[playerID].socket = socket;
+      players[playerID].connected = true;
+      socket.emit('join', {
+        playerID: playerID
+      });
+    })
 
     socket.on('disconnect', function() {
       // console.log('socket disconnected: ', socket);
