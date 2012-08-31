@@ -57,12 +57,18 @@
 						<td>Players</td>
 						<td>Tricks</td>
 						<td>Score</td>
+						<td></td>
 					</tr>
 					<% for (var i = 0; i < players.length; i++) { %>
 					<tr>
 						<td> <%- players[i].playerID %> </td>
 						<td> <%- players[i].tricks %> </td>
 						<td> <%- players[i].score %> </td>
+						<td> 
+							<% if (players[i].turn) { %> 
+								<span class="badge badge-info">turn</span> 
+							<% } %> 
+						</td>
 					</tr>
 					<% } %>
 				</tbody>

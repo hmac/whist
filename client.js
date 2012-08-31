@@ -191,7 +191,8 @@
         var p = {
           playerID: playerID,
           score: _state.scores[playerID],
-          tricks: tricks && tricks[playerID] ? tricks[playerID] : 0
+          tricks: tricks && tricks[playerID] ? tricks[playerID] : 0,
+          turn: _state.expectedTurn && _state.expectedTurn.playerID === playerID ? true : false
         };
         players.push(p);
       });
