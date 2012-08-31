@@ -131,6 +131,7 @@
       socket.on('state', _.bind(this.render, this));
     },
     render: function() {
+      this.$el.css('display', 'block');
       var trumps = {
         "C": "Clubs",
         "D": "Diamonds",
@@ -138,7 +139,7 @@
         "S": "Spades"
       };
       var t = trumps[_state.trumps];
-      this.$el.html(t);
+      this.$el.html("Trumps are "+t);
     }
   });
 
@@ -238,7 +239,7 @@
       });
 
       var trumpsView = new TrumpsView({
-        el: $('#trumps_display')
+        el: $('#trumps-alert')
       });
 
       var bidView = new BidView({
