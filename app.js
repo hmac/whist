@@ -7,7 +7,7 @@
 
   Game = require("./game.js").Game;
 
-  port = process.argv[2] || 3000;
+  port = process.env.PORT || process.argv[2] || 3000;
 
   num_players = process.argv[3] || 2;
 
@@ -94,7 +94,6 @@
     });
 
     socket.on('rejoin', function(data) {
-      console.log('rejoin', data);
       if (!game.playerExists(data.playerID)) {
         console.log('player does not exist');
         return;
