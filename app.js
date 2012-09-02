@@ -22,8 +22,29 @@
       if (err) {
         console.log(err);
       }
-      res.writeHead(200);
-      return res.end(data);
+      else {
+        fs.stat(__dirname + file, function(err, stat) {
+          if (err) {
+            res.statusCode = 500;
+            res.end();
+          }
+          else {
+            var etag = stat.size + '-' + Date.parse(stat.mtime);
+            res.setHeader('Last-Modified', stat.mtime);
+
+            if (req.headers['if-none-match'] === etag) {
+              res.statusCode = 304;
+              res.end();
+            }
+            else {
+              res.setHeader('Content-Length', data.length);
+              res.setHeader('ETag', etag);
+              res.statusCode = 200;
+              res.end(data);
+            }
+          }
+        });
+      }
     });
   });
 
