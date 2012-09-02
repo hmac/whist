@@ -131,6 +131,9 @@
       socket.on('state', _.bind(this.render, this));
     },
     render: function() {
+      if (!_state.trumps) {
+        return;
+      }
       this.$el.css('display', 'block');
       var trumps = {
         "C": "Clubs",
@@ -216,7 +219,38 @@
         password: pass
       });
     }
-  })
+  });
+
+  var BidsView = Backbone.View.extend({
+    initialize: function() {
+      this.template = _.template($('#bids_template').html());
+      socket.on('state', _.bind(this.render, this));
+    },
+    render: function() {
+      var res = [];
+      _.each(_state.moves, function(m, j) {
+        res[j] = {};
+        for (var i = 0; i < _state.players.length; i++) {
+          if (_state.moves[j][i]) {
+            var bid = _state.moves[j][i];
+            var obj = res[j][bid.playerID] = {};
+            obj.bid = bid.value;
+          }
+        }
+      });
+      var keys = _.filter(_.keys(_state.scores), function(k) { return !_.include(_state.players, k) } );
+      _.each(keys, function(key) {
+        _.each(_state.players, function(p) {
+          res[key][p].score = _state.scores[key][p]
+        });
+      });
+      console.log(res);
+      this.$el.html(this.template({
+        data: res,
+        players: _state.players
+      }));
+    }
+  });
 
   /*
     Main App View
@@ -254,6 +288,10 @@
       var authView = new AuthView({
         el: $('#auth')
       });
+
+      var bidsView = new BidsView({
+        el: $('#bids')
+      })
 
       socket.on('state', function(data) {
         var e = (data.state.expectedTurn != null) ? data.state.expectedTurn : void 0;

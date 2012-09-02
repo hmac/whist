@@ -33,7 +33,7 @@
 		<div id="trumps-alert" class="alert alert-error" style="display:none"></div>
 		<div id="turn" class="alert alert-info" style="display:none">It is your turn</div>
 		<div id="state"></div>
-		<div id="trumps" style="display:none">
+		<div id="trumps" class="well" style="display:none">
 			<h4>Pick Trumps:</h4>
 			<img id="C" src="cards/1.png">
 			<img id="S" src="cards/2.png">
@@ -61,6 +61,7 @@
 			</div>
 		<h4> Hand </h4>
 		<div id="hand" class="well cards"></div>
+		<div id="bids"></div>
 		<script type="text/html" id="state_template">
 			<table class="table table-striped">
 				<tbody>
@@ -80,6 +81,43 @@
 								<span class="badge badge-info">turn</span> 
 							<% } %> 
 						</td>
+					</tr>
+					<% } %>
+				</tbody>
+			</table>
+		</script>
+		<script type="text/html" id="bids_template">
+			<table class="table table-striped">
+				<thead>
+					<th>
+						<th></th>
+						<% for (var i = 0; i < players.length; i++) { %>
+							<td> <strong><%- players[i] %></strong> </td><td></td>
+						<% } %>
+					</th>
+				</thead>
+				<tbody>
+					<tr>
+						<td></td>
+						<% for (var i = 0; i < players.length; i++) { %>
+							<td> Bid </td> <td> Score </td>
+						<% } %>
+					</tr>
+					<% for (var i = 0; i < data.length; i++) { %>
+					<tr>
+						<td>Round <%= i+1 %> </td>
+						<% _.each(data[i], function(obj) { %>
+							<td>
+							<% if (obj.bid) {%>
+								<%- obj.bid %>
+							<% } %>
+							</td>
+							<td>
+							<% if (obj.value) {%>
+								<%- obj.value %>
+							<% } %>
+							</td>
+						<% }); %>
 					</tr>
 					<% } %>
 				</tbody>

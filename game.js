@@ -92,7 +92,8 @@
       players:      this.players,
       hand:         this.cards[playerID],
       scores:       this.scores,
-      tricks:       this.tricks
+      tricks:       this.tricks,
+      moves:        this.moves
     };
 
   };
