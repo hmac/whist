@@ -70,11 +70,11 @@
         console.log("game has not begun");
         return;
       }
-      if ((game.expectedTurn != null) && game.expectedTurn.playerID !== playerID) {
+      if ((game.expectedTurn !== null) && game.expectedTurn.playerID !== playerID) {
         console.log("it is not " + playerID + "'s turn");
         return;
       }
-      if ((game.expectedTurn != null) && game.expectedTurn.type !== move.type) {
+      if ((game.expectedTurn !== null) && game.expectedTurn.type !== move.type) {
         console.log("expected move type " + game.expectedTurn.type + ", received " + move.type);
         return;
       }
@@ -129,7 +129,7 @@
       socket.emit('join', {
         playerID: playerID
       });
-    })
+    });
 
     socket.on('disconnect', function() {
       // console.log('socket disconnected: ', socket);
@@ -157,6 +157,6 @@
         state: game.getState(id)
       });
     }
-  }
+  };
 
 }).call(this);
