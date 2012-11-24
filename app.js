@@ -133,7 +133,7 @@
 
     socket.on('disconnect', function() {
       // console.log('socket disconnected: ', socket);
-      playerID[playerID] && (players[playerID].connected = false);
+      if (players[playerID]) players[playerID].connected = false;
     });
 
   });
