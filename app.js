@@ -9,7 +9,7 @@
 
   port = process.env.PORT || process.argv[2] || 3000;
 
-  num_players = process.argv[3] || 2;
+  num_players = process.argv[3] - 0 || 2;
 
   app = require('http').createServer(function(req, res) {
     var file = null;
