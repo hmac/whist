@@ -122,7 +122,7 @@
     },
     setVisible: function(vis) {
       var disp = vis ? "block" : "none";
-      this.$el.css('display', disp);      
+      this.$el.css('display', disp);
     }
   });
 
@@ -160,7 +160,7 @@
     },
     setVisible: function(vis) {
       var disp = vis ? "block" : "none";
-      this.$el.css('display', disp);      
+      this.$el.css('display', disp);
     }
   });
 
