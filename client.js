@@ -20,7 +20,7 @@
         playerID: resp
       };
     }
-  })
+  });
 
   /*
     Collections
@@ -85,7 +85,7 @@
         el.append(view.el);
       });
     }
-  })
+  });
 
   var CardView = Backbone.View.extend({
     tagName: 'img',
@@ -193,11 +193,25 @@
       'click #auth-new-submit': 'createNew'
     },
     initialize: function() {
+      var self = this;
       var el = this.$el;
-      socket.once('join', function(data) {
-        playerID = data.playerID;
-        el.modal('hide');
-        socket.emit('state');
+      this.$('#auth-alert').css('display', 'none');
+      socket.on('join', function(data) {
+        // Return if user is already joined
+        if (playerID !== null) {return;}
+
+        self.$('#auth-alert').css('display', 'none');
+        self.$('#auth-alert').html('');
+
+        if (data.hasOwnProperty('playerID')) {
+          playerID = data.playerID;
+          el.modal('hide');
+          socket.emit('state');
+        }
+        else {
+          self.$('#auth-alert').html(data.error);
+          self.$('#auth-alert').css('display','block');
+        }
       });
       this.$el.modal();
     },
