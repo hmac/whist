@@ -33,7 +33,7 @@
     this.round = 1;
     this.events = {};
     return this;
-  }
+  };
 
   /*
     Export Game object
