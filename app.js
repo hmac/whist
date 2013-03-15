@@ -57,6 +57,7 @@
   // io.set("polling duration", 10);
 
   app.listen(port);
+  console.log("Server listening on port", port);
 
   game = new Game(num_players);
 
