@@ -4,7 +4,23 @@
 
   var playerID = null;
 
-  var _state = null;
+  var _state = {
+    expectedTurn: null,
+    hand:         [],
+    moves:        [],
+    playerLimit:  null,
+    players:      [],
+    round:        null,
+    scores:       {},
+    table:        [],
+    tricks:       [],
+    trumps:       null
+  };
+  _.extend(_state, Backbone.Events);
+  _state.set = function(state) {
+    _.extend(this, state);
+    this.trigger('change');
+  };
 
   /*
     Models
@@ -28,21 +44,22 @@
 
   var Hand = Backbone.Collection.extend({
     sync: function(method, model, options) {
-      _state && options.success(_state.hand);
+      options.success(_state.hand);
     },
     initialize: function() {
-      var self = this;
-      socket.on('state', _.bind(this.fetch, this));
+      _state.on('change', _.bind(this.fetch, this));
     }
   });
 
   var Table = Backbone.Collection.extend({
     sync: function(method, model, options) {
-      _state && options.success(_state.table)
+      if (_state) {
+      options.success(_state.table);
+      }
     },
     initialize: function() {
       var self = this;
-      socket.on('state', _.bind(this.fetch, this));
+      _state.on('change', _.bind(this.fetch, this));
     }
   });
 
@@ -128,7 +145,7 @@
 
   var TrumpsView = Backbone.View.extend({
     initialize: function() {
-      socket.on('state', _.bind(this.render, this));
+      _state.on('change', _.bind(this.render, this));
     },
     render: function() {
       if (!_state.trumps) {
@@ -167,7 +184,7 @@
   var StateView = Backbone.View.extend({
     initialize: function(options) {
       this.template = _.template($('#state_template').html());
-      socket.on('state', _.bind(this.render, this));
+      _state.on('change', _.bind(this.render, this));
     },
     render: function() {
       var players = [];
@@ -238,7 +255,7 @@
   var BidsView = Backbone.View.extend({
     initialize: function() {
       this.template = _.template($('#bids_template').html());
-      socket.on('state', _.bind(this.render, this));
+      _state.on('change', _.bind(this.render, this));
     },
     render: function() {
       var res = [];
@@ -258,7 +275,6 @@
           res[key][p].score = _state.scores[key][p]
         });
       });
-      console.log(res);
       this.$el.html(this.template({
         data: res,
         players: _state.players
@@ -305,7 +321,7 @@
 
       var bidsView = new BidsView({
         el: $('#bids')
-      })
+      });
 
       socket.on('state', function(data) {
         var e = (data.state.expectedTurn != null) ? data.state.expectedTurn : void 0;
@@ -327,14 +343,23 @@
         }
       });
     }
-  })
+  });
 
   /*
     Socket.IO Events
   */
 
   socket.on('state', function(data) {
-    _state = data.state;
+    if (data.state.moves.length !== 0) {
+      var moves = data.state.moves[data.state.round-1];
+      if (data.state.table.length === 0 && data.state.moves.length !== 0 && moves[moves.length-1].type == "card") {
+        // Move is ending trick, so wait a bit before clearing everything so players can see the last card played.
+        console.log("ending trick");
+        window.setTimeout(function() {_state.set(data.state);}, 3000);
+        return;
+      }
+    }
+    _state.set(data.state);
   });
 
   socket.on('end', function() {

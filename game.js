@@ -138,18 +138,18 @@
 
   Game.prototype.makeMove = function(move, cb) {
     var card_removed, _base, _name;
-    console.log('makeMove');
+    console.log('\nmove attempt:', move);
     if (!(move.type === this.expectedTurn.type && move.playerID === this.expectedTurn.playerID)) {
       cb();
       return;
     }
     if (!(this.validateMove(move))) {
-      console.log("invalid move");
+      console.log("--> invalid move");
       cb();
       return;
     }
     if (move.type === "trumps") {
-      console.log('trumps move');
+      console.log('--> trumps move');
       this.trumps = move.value;
       this.expectedTurn = {
         type: "bid",
@@ -176,16 +176,17 @@
     } else {
       card_removed = this.cards[move.playerID].remove(move.value);
       this.table.push(move.value);
+      cb();
       if (move.playerID === this.players[this.players.length - 1]) {
         this.concludeTrick();
       } else {
-        console.log('trick not ended');
         this.expectedTurn = {
           type: "card",
           playerID: this.players[this.players.indexOf(move.playerID) + 1]
         };
       }
     }
+    console.log("--> move successful");
     return cb();
   };
 
