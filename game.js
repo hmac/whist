@@ -236,7 +236,6 @@
         type: "card",
         playerID: this.players[0]
       };
-      return console.log("here");
     }
   };
 

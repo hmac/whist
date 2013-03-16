@@ -352,7 +352,7 @@
   socket.on('state', function(data) {
     if (data.state.moves.length !== 0) {
       var moves = data.state.moves[data.state.round-1];
-      if (data.state.table.length === 0 && data.state.moves.length !== 0 && moves[moves.length-1].type == "card") {
+      if (moves && data.state.table.length === 0 && data.state.moves.length !== 0 && moves[moves.length-1].type == "card") {
         // Move is ending trick, so wait a bit before clearing everything so players can see the last card played.
         console.log("ending trick");
         window.setTimeout(function() {_state.set(data.state);}, 3000);
